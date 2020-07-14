@@ -1,1 +1,4 @@
 .env
+
+#folders
+/node_modules
