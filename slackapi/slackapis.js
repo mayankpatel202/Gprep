@@ -9,7 +9,7 @@ const post = (url, body=null, config={}) => {
 
 const get = (url, config={}) => {
     return axios.get(url, config)
-      .then((response) => response.data)
+      .then(response => response.data)
       .catch(err => err)
 }
 

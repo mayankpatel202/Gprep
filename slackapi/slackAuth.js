@@ -1,4 +1,5 @@
 const api = require('./slackapis');
+const query = require('../database/queries');
 
 const getToken = (slackCode) => {
   let url = 'https://slack.com/api/oauth.v2.access';
@@ -16,11 +17,21 @@ const getToken = (slackCode) => {
 
   return api.post(url, null, config)
     .then(async (response) => {
-      let checkAdmin = await isAdmin(response.authed_user)
+      let userInfo = await isAdmin(response.authed_user.id, response.access_token)
+      let checkAdmin = userInfo.ok;
       if(checkAdmin) {
+        let data = {
+          team: response.team,
+          teamToken: response.access_token,
+          userId: userInfo.user.id,
+          userName: userInfo.user.profile.real_name,
+          userEmail: userInfo.user.profile.email,
+          userToken: response.authed_user.access_token
+        }
+        await query.createTable(data);
         return response;
       } else {
-        api.get('https://slack.com/api/auth.revoke', { params: { token: response.data.authed_user.access_token } })
+        api.get('https://slack.com/api/auth.revoke', { params: { token: response.authed_user.access_token } })
         return { ok: false, error: "Not An Admin"};
       }
     
@@ -31,7 +42,7 @@ const getToken = (slackCode) => {
 
 
 
-const isAdmin = ({ id, access_token }) => {
+const isAdmin = (id, access_token) => {
   let url = 'https://slack.com/api/users.info';
   let params = { user: id, token: access_token }
   let config = {
@@ -42,7 +53,7 @@ const isAdmin = ({ id, access_token }) => {
   }
 
   return api.get(url, config)
-    .then( response =>  response.user.is_admin )
+    .then( response =>  { return response } )
     .catch(err => console.log(err));
   
 }
