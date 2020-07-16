@@ -32,7 +32,7 @@ const getToken = (slackCode) => {
         return response;
       } else {
         api.get('https://slack.com/api/auth.revoke', { params: { token: response.authed_user.access_token } })
-        return { ok: false, error: "Not An Admin"};
+        return userInfo;
       }
     
     })

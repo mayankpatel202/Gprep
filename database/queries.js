@@ -23,4 +23,16 @@ const createTable = ({ team, teamToken, userId, userName, userEmail, userToken }
   });
 }
 
-module.exports = { createTable };
+const checkStaff = (userId, teamName, cb) => {
+  teamName = teamName.toLowerCase().replace(/ /g,'');
+  let query = `SELECT 1 FROM ${teamName} WHERE id='${userId}'`;
+
+  connection.query(query, (err, result) => {
+    if(err) throw err;
+    
+    let isExist = result.length !== 0;
+    cb(isExist);
+  });
+}
+
+module.exports = { createTable, checkStaff };
