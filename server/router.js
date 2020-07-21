@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const token = require('../slack/slackApis');
 const query = require('../database/queries');
-const createBlocks = require('../slack/PrivateBlocks');
+const createBlocks = require('../slack/PrivateChannels/PrivateBlocks');
 const openModals = require('../slack/modal');
 
 

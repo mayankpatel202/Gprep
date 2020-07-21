@@ -11,6 +11,5 @@ module.exports = (allUsers) => {
       });
     }
   });
-  console.log(staff);
   return staff;
 }

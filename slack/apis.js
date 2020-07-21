@@ -1,5 +1,4 @@
 const axios = require('axios');
-const qs = require('qs');
 
 const post = (url, body=null, config={}) => {
     return axios.post(url, body, config)
