@@ -1,38 +1,128 @@
 const connection = require('./index');
 
-const createTable = ({ team, teamToken, userId, userName, userEmail, userToken }) => {
-  teamName = team.name.toLowerCase().replace(/ /g,'')
-  let query = `CREATE TABLE IF NOT EXISTS ${teamName} (
+const createTable = (teamTableName) => {
+  teamTableName = teamTableName.toLowerCase()
+  let query = `CREATE TABLE IF NOT EXISTS ${teamTableName} (
     id VARCHAR(20) NOT NULL PRIMARY KEY,
     name VARCHAR(50),
     token VARCHAR(255),
     email VARCHAR(50)
   )`;
+  
+  return new Promise((resolve, reject) => {
+    connection.query(query, (error, results) => {
+      if(error) console.log("Create Table Error: ", error);
+      resolve(results);
+    });
+  });
+  
+}
 
-  connection.query(query, (error, results) => {
-    if(error) console.log("Create Table Error: ", error);
-    let queryCommand = `INSERT IGNORE INTO ${teamName} (id, name, token, email) VALUES ?`;
-    let values = [
-      [ team.id, teamName, teamToken, ''],
-      [ userId, userName, userToken, userEmail ]
-    ];
+const checkStaff = (userId, teamId) => {
+  teamId = teamId.toLowerCase();
+  let query = `SELECT EXISTS(SELECT * FROM ${teamId} WHERE id ='${userId}')`;
+  return new Promise((resolve, reject) => {
+    connection.query(query, (err, result) => {
+      if(err) throw err;
+      resolve(Object.values(result[0])[0]);
+    });
+  });
+  
+}
+
+const insertTeamProfile = (teamProfile) => {
+  let queryCommand = `REPLACE INTO ${teamProfile.team.id.toLowerCase()} (id, name, token, email) VALUES ?`;
+  let values = [
+    [ teamProfile.team.id, teamProfile.team.name, teamProfile.teamToken, '']
+  ];
+
+  return new Promise((resolve, reject) => {
     connection.query(queryCommand, [values], (err, result) => {
       if(err) throw err;
-      console.log("After inserting record", result.affectedRows);
+      resolve(result);
+    });
+  });
+  
+}
+
+const insertUserProfile = (userProfile, tableName) => {
+  tableName = tableName.toLowerCase();
+  let queryCommand = `REPLACE INTO ${tableName} (id, name, token, email) VALUES ?`;
+  let values = [
+    [ userProfile.userId, userProfile.userName, userProfile.userToken, userProfile.userEmail ]
+  ];
+
+  return new Promise((resolve, reject) => {
+    connection.query(queryCommand, [values], (err, result) => {
+      if(err) throw err;
+      resolve(result);
+    });
+  });
+  
+}
+
+const insertUserToken = (userInfo, tableName) => {
+  tableName = tableName.toLowerCase();
+  let query = `UPDATE ${tableName} SET token = '${userInfo.token}' WHERE id = '${userInfo.userId}'`;
+  
+  return new Promise((resolve, reject) => {
+    connection.query(query, (err, result) => {
+      if(err) throw err;
+      resolve(result);
+    });
+  });
+
+}
+
+const insertStaffProfile = (staffProfiles, tableName) => {
+  tableName = tableName.toLowerCase();
+  let query = `INSERT IGNORE INTO ${tableName} (id, name, email) VALUES ?`;
+  let values = staffProfiles.map((staff) => {
+    return [ staff.staffId, staff.staffName, staff.staffEmail ]
+  });
+
+  return new Promise((resolve, reject) => {
+    connection.query(query, [values], (err, result) => {
+      if(err) throw err;
+      resolve(result);
+    });
+  });
+   
+}
+
+//might not need this... 
+const getUserToken = (userId, teamId) => {
+  let tableName = teamId.toLowerCase();
+  let query = `SELECT token FROM ${tableName} WHERE id='${userId}'`;
+
+  return new Promise((resolve, reject) => {
+    connection.query(query, (err, result) => {
+      if(err) throw err;
+      resolve(result);
+    });
+  });
+  
+};
+
+const checkToken = (userId, tableName) => {
+  tableName = tableName.toLowerCase();
+  let query = `SELECT IFNULL((SELECT token FROM ${tableName} WHERE id='${userId}'), '') As ResultNotFound`;
+
+  return new Promise((resolve, reject) => {
+    connection.query(query, (err, result) => {
+      if(err) throw err;
+      resolve(result[0].ResultNotFound)
     });
   });
 }
 
-const checkStaff = (userId, teamName, cb) => {
-  teamName = teamName.toLowerCase().replace(/ /g,'');
-  let query = `SELECT 1 FROM ${teamName} WHERE id='${userId}'`;
-
-  connection.query(query, (err, result) => {
-    if(err) throw err;
-    
-    let isExist = result.length !== 0;
-    cb(isExist);
-  });
-}
-
-module.exports = { createTable, checkStaff };
+module.exports = { 
+  createTable, 
+  checkStaff, 
+  getUserToken, 
+  insertTeamProfile, 
+  insertUserProfile,
+  insertUserToken,
+  insertStaffProfile,
+  checkToken
+};
