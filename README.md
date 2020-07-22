@@ -45,8 +45,8 @@ A step by step series of examples that tell you how to get a development env run
 19. Add the app to a workspace, avoid testing the app on an active workspace.
 
 ## Create a .env file in main project folder.
-   - SLACK_CLIENT_ID= *In **Basic Informatio** in your slack app*
-   - SLACK_CLIENT_SECRET=*In **Basic Informatio** in your slack app*
+   - SLACK_CLIENT_ID= *In **Basic Information** in your slack app*
+   - SLACK_CLIENT_SECRET=*In **Basic Information** in your slack app*
    - MYSQL_USER= *your database user name (usually root)*
    - MYSQL_HOST=localhost
    - MYSQL_DATABASE=hrprep
