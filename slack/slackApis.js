@@ -71,7 +71,8 @@ const userProfile = (id, access_token) => {
   
 }
 
-const getUserList = (token) => {
+const getUserList = async (token, teamId, staffId) => {
+  token = token || await query.checkToken(staffId, teamId);
   let url = 'https://slack.com/api/users.list';
   let params = { token }
   let config = {
@@ -85,6 +86,54 @@ const getUserList = (token) => {
     .then( response =>  { return response } )
     .catch(err => console.log(err));
 }
+
+const getPrivateChannelMembers = async (channelId, userId, teamId) => {
+  let token = await query.checkToken(userId, teamId);
+  let url = 'https://slack.com/api/conversations.members';
+  let body = { token, channel: channelId };
+  let config = {
+    params: body,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+
+  return api.post(url, null, config)
+    .then( response =>  { return response } )
+    .catch(err => console.log(err));
+}
+
+const sendMessageToStudentChats = async (channel, message, userId, teamId) => {
+  let token = await query.checkToken(userId, teamId);
+  let url = 'https://slack.com/api/chat.postMessage';
+  let body = { token, channel: channel.channelId, text: message, as_user: true, mrkdwn: true };
+  let config = {
+    params: body,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+
+  return api.post(url, null, config)
+    .then( response =>  { return response } )
+    .catch(err => console.log(err));
+}
+
+const getPrivateChannels = async (userId, teamId) => {
+  let token = await query.checkToken(userId, teamId);
+  let url = 'https://slack.com/api/conversations.list';
+  let body = { token, types: 'private_channel' };
+  let config = {
+    params: body,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+
+  return api.get(url, config)
+    .then( response =>  { return response } )
+    .catch(err => console.log(err));
+}
   
 
-module.exports = { getToken, getUserList }
+module.exports = { getToken, getUserList, getPrivateChannelMembers, sendMessageToStudentChats, getPrivateChannels }

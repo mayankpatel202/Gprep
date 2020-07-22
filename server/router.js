@@ -4,6 +4,7 @@ const token = require('../slack/slackApis');
 const query = require('../database/queries');
 const createBlocks = require('../slack/PrivateChannels/PrivateBlocks');
 const openModals = require('../slack/modal');
+const rPayload = require('../slack/payloadRouter');
 
 
 router.post('/broadcastPrivateChannel', async (req, res) => {
@@ -11,7 +12,7 @@ router.post('/broadcastPrivateChannel', async (req, res) => {
   let staffExist = await query.checkStaff(user_id, team_id);
   let token = await query.checkToken(user_id, team_id);
   if (staffExist && token) {
-    let block = createBlocks();
+    let block = createBlocks(req.body.text);
     await openModals(block, trigger_id, token);
     res.status(200).send();
   } else {
@@ -21,11 +22,8 @@ router.post('/broadcastPrivateChannel', async (req, res) => {
 });
 
 router.post('/payload', async (req, res) => {
-  //console.log("Payload: ", JSON.parse(req.body.payload).view.state);
-  let input = JSON.parse(req.body.payload).view.state.values.PrivateChannelMessageLabel;
-  let list = JSON.parse(req.body.payload).view.state.values.PrivateChannelList;
-  console.log(input);
-  console.log(list)
+  let payload = JSON.parse(req.body.payload);
+  rPayload.routePayload(payload.view.state.values, payload.user, payload.team, payload.view.blocks)
   res.status(200).send();
 });
 

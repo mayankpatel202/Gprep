@@ -116,6 +116,18 @@ const checkToken = (userId, tableName) => {
   });
 }
 
+const getUserIds = (tableName) => {
+  tableName = tableName.toLowerCase();
+  let query = `SELECT id FROM ${tableName}`;
+
+  return new Promise((resolve, reject) => {
+    connection.query(query, (err, result) => {
+      if(err) throw err;
+      resolve(result)
+    });
+  });
+}
+
 module.exports = { 
   createTable, 
   checkStaff, 
@@ -124,5 +136,6 @@ module.exports = {
   insertUserProfile,
   insertUserToken,
   insertStaffProfile,
-  checkToken
+  checkToken,
+  getUserIds
 };

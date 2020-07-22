@@ -1,9 +1,8 @@
 
 
-module.exports  = () => {
+module.exports = (msg) => {
   let block = {
     "type": "modal",
-    "callback_id": "Private_Channels_Modal",
     "title": {
       "type": "plain_text",
       "text": "Select Private Channels",
@@ -14,19 +13,44 @@ module.exports  = () => {
     },
     "blocks": [
       {
+        "type": "context",
+        "block_id": "PrivateChannelMessage",
+        "elements": [
+          {
+            "type": "mrkdwn",
+            "text": msg
+          }
+        ]
+      },
+      {
+        "type": "divider"
+      },
+      {
         "type": "input",
-        "block_id": "PrivateChannelMessageLabel",
+        "block_id": "AllPrivateChannelSelect",
         "label": {
           "type": "plain_text",
-          "text": "Type your Message"
+          "text": "Select All Student Private Chats"
         },
         "element": {
-          "type": "plain_text_input",
-          "action_id": "PrivateChannelMessage",
-          "placeholder": {
-            "type": "plain_text",
-            "text": "Enter your Message"
-          }
+          "action_id": "AllStudentPrivateChannel",
+          "type": "radio_buttons",
+          "options": [
+            {
+              "value": "ALL",
+              "text": {
+                "type": "plain_text",
+                "text": "ALL"
+              }
+            },
+            {
+              "value": "Not_All",
+              "text": {
+                "type": "plain_text",
+                "text": "IF NOT ALL"
+              }
+            }
+          ]
         }
       },
       {
@@ -41,16 +65,18 @@ module.exports  = () => {
           "type": "multi_conversations_select",
           "placeholder": {
             "type": "plain_text",
-            "text": "Select Chats"
+            "text": "Select Private Channels"
           },
           "filter": {
             "include": ["private"],
-            "exclude_bot_users": true
+            "exclude_bot_users": true,
           }
         }
-      },
+      }
     ]
   }
 
   return block;
 }
+
+
