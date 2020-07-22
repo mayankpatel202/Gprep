@@ -12,13 +12,12 @@ const createMessage = async (payload, staffId, teamId, blocks) => {
   
   if(payload.AllPrivateChannelSelect.AllStudentPrivateChannel.selected_option.value === "ALL") {
     let listOfPvtChannels = await getAllStudentPrivateChannelIds(staffId, teamId);
-    let privateChannelData = await getPvtChannelMembers(listOfPvtChannels, staffId, teamId);
-    await sendMessage(privateChannelData, message, staffId, teamId)
   } else {
     let listOfPvtChannels = payload.PrivateChannelList.PrivateChatChannelList.selected_conversations;
-    let privateChannelData = await getPvtChannelMembers(listOfPvtChannels, staffId, teamId);
-    await sendMessage(privateChannelData, message, staffId, teamId)
   }
+  
+  let privateChannelData = await getPvtChannelMembers(listOfPvtChannels, staffId, teamId);
+  await sendMessage(privateChannelData, message, staffId, teamId)
   
 }
 
@@ -61,7 +60,6 @@ const getAllStudentPrivateChannelIds = async (staffId, teamId) => {
       studentChannels.push(channel.id);
     }
   });
-  // console.log("All private channels", studentChannels);
   return studentChannels;
 }
 
