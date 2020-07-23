@@ -122,7 +122,7 @@ const sendMessageToStudentChats = async (channel, message, userId, teamId) => {
 const getPrivateChannels = async (userId, teamId) => {
   let token = await query.checkToken(userId, teamId);
   let url = 'https://slack.com/api/conversations.list';
-  let body = { token, types: 'private_channel' };
+  let body = { token, types: 'private_channel', limit: 1000 };
   let config = {
     params: body,
     headers: {

@@ -9,37 +9,40 @@ const createMessage = async (payload, staffId, teamId, blocks) => {
       message = block.elements[0].text;
     }
   });
-  
+  let listOfPvtChannels;
   if(payload.AllPrivateChannelSelect.AllStudentPrivateChannel.selected_option.value === "ALL") {
-    let listOfPvtChannels = await getAllStudentPrivateChannelIds(staffId, teamId);
+    listOfPvtChannels = await getAllStudentPrivateChannelIds(staffId, teamId);
   } else {
-    let listOfPvtChannels = payload.PrivateChannelList.PrivateChatChannelList.selected_conversations;
+    listOfPvtChannels = payload.PrivateChannelList.PrivateChatChannelList.selected_conversations;
   }
-  
-  let privateChannelData = await getPvtChannelMembers(listOfPvtChannels, staffId, teamId);
-  await sendMessage(privateChannelData, message, staffId, teamId)
-  
+
+  let userLists = await slackApi.getUserList(null, teamId, staffId);
+  let privateChannelMembers = await getPvtChannelMembers(listOfPvtChannels, staffId, teamId);
+  let privateChannelData = processMessageBody(privateChannelMembers, userLists);
+  let resultOfSending = await sendMessage(privateChannelData, message, staffId, teamId)
+  console.log(resultOfSending);
 }
 
-const getPvtChannelMembers = async (pvtChannels, staffId, teamId) => {
+const getPvtChannelMembers = (pvtChannels, staffId, teamId) => {
   
-  let userLists = await slackApi.getUserList(null, teamId, staffId);
   return Promise.all(pvtChannels.map(async (channel) => {
-    let members = await slackApi.getPrivateChannelMembers(channel, staffId, teamId);
-    let studentId = await getPrivateChannelStudentId(members, teamId, staffId, userLists);
-    return { channelId: channel, studentId };
+    let privateChannelMembers = await slackApi.getPrivateChannelMembers(channel, staffId, teamId);
+    return [channel, privateChannelMembers];
   }));
 
 }
 
-const getPrivateChannelStudentId = async (members, teamId, staffId, userLists) => {
-  for(var i = 0; i < userLists.members.length; i++) {
-    let user = userLists.members[i];
-    if(members.members.includes(user.id) && !(user.profile.email.includes('@galvanize.com'))) {
-      return user.id;
+const processMessageBody = (members, userLists) => {
+  let channelAndStudentIds = [];
+  for(var user of userLists.members) {
+    for(var pvtChannelMembers of members) {
+      if(pvtChannelMembers[1].members.includes(user.id) && user.profile.email &&!(user.profile.email.includes("galvanize.com"))) {
+        channelAndStudentIds.push({ channelId: pvtChannelMembers[0], studentId: user.id })
+      }
     }
   }
-   
+  
+  return channelAndStudentIds;
 }
 
 const sendMessage = (privateChannelData, message, staffId, teamId) => {
